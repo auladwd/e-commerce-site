@@ -24,9 +24,9 @@ export default function Footer() {
 
   const isAdmin = Boolean(
     user &&
-      (user.role === "admin" ||
-        user.email?.toLowerCase().includes("admin") ||
-        user.email?.toLowerCase().endsWith("@smartshopbd.com"))
+    (user.role === "admin" ||
+      user.email?.toLowerCase().includes("admin") ||
+      user.email?.toLowerCase().endsWith("@smartshopbd.com"))
   );
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function Footer() {
             setCategories(json.data);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
     };
 
     loadFooterCats();

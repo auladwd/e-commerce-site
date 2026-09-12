@@ -29,6 +29,16 @@ export const metadata: Metadata = {
   title: "স্মার্টশপ বাংলাদেশ | SmartShop BD - সেরা দামে আধুনিক ই-কমার্স",
   description:
     "সেরা দামে সেরা গ্যাজেট ও লাইফস্টাইল পণ্য, সারা দেশে ক্যাশ অন ডেলিভারি এবং দ্রুততম হোম ডেলিভারি।",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
