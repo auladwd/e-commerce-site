@@ -26,7 +26,7 @@ interface CartContextType {
   subtotal: number;
   couponCode: string;
   discount: number;
-  applyCoupon: (code: string) => { success: boolean; message: string };
+  applyCoupon: (code: string) => Promise<{ success: boolean; message: string }>;
   removeCoupon: () => void;
   quickBuyProduct: ProductItem | null;
   openQuickBuy: (product: ProductItem) => void;
@@ -40,6 +40,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
+  const [couponConfig, setCouponConfig] = useState<{
+    code: string;
+    type: "percentage" | "fixed";
+    value: number;
+    minOrder: number;
+  } | null>(null);
   const [quickBuyProduct, setQuickBuyProduct] = useState<ProductItem | null>(null);
 
   // Load cart from localStorage
@@ -147,6 +153,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCartItems([]);
     setCouponCode("");
     setDiscount(0);
+    setCouponConfig(null);
     localStorage.removeItem("shopping_cart");
   };
 
@@ -157,25 +164,101 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  const applyCoupon = (code: string) => {
+  // Recalculate discount if cart items/subtotal change
+  useEffect(() => {
+    if (!couponConfig || cartItems.length === 0) {
+      if (cartItems.length === 0 && (couponCode || discount > 0)) {
+        setCouponCode("");
+        setDiscount(0);
+        setCouponConfig(null);
+      }
+      return;
+    }
+
+    if (subtotal < couponConfig.minOrder) {
+      setDiscount(0);
+      return;
+    }
+
+    if (couponConfig.type === "percentage") {
+      setDiscount(Math.round(subtotal * (couponConfig.value / 100)));
+    } else {
+      setDiscount(Math.min(couponConfig.value, subtotal));
+    }
+  }, [subtotal, couponConfig, cartItems.length, couponCode, discount]);
+
+  const applyCoupon = async (code: string): Promise<{ success: boolean; message: string }> => {
     const clean = code.trim().toUpperCase();
-    if (clean === "DISCOUNT100" || clean === "EID100") {
-      setCouponCode(clean);
-      setDiscount(100);
-      return { success: true, message: "৳১০০ ডিসকাউন্ট যুক্ত হয়েছে!" };
+    if (!clean) {
+      return { success: false, message: "দয়া করে কুপন কোড লিখুন।" };
     }
-    if (clean === "SAVE10" || clean === "WELCOME10") {
+
+    try {
+      const res = await fetch("/api/settings");
+      const json = await res.json();
+      const settings = json?.data;
+
+      // Check if admin has enabled coupon system
+      const isEnabled = settings?.couponEnabled ?? false;
+      if (!isEnabled) {
+        return {
+          success: false,
+          message: "বর্তমানে কোনো কুপন অফার সক্রিয় নেই।",
+        };
+      }
+
+      const activeCode = (settings?.couponCode || "SAVE10").trim().toUpperCase();
+      if (clean !== activeCode) {
+        return {
+          success: false,
+          message: "ভুল অথবা অকার্যকর কুপন কোড।",
+        };
+      }
+
+      const minOrder = Number(settings?.couponMinOrder) || 0;
+      if (subtotal < minOrder) {
+        return {
+          success: false,
+          message: `এই কুপনের জন্য সর্বনিম্ন ৳${minOrder} টাকার পণ্য কার্টে থাকতে হবে।`,
+        };
+      }
+
+      const discountType = (settings?.couponDiscountType || "percentage") as "percentage" | "fixed";
+      const discountVal = Number(settings?.couponDiscountValue) || 10;
+
+      let calcDiscount = 0;
+      if (discountType === "percentage") {
+        calcDiscount = Math.round(subtotal * (discountVal / 100));
+      } else {
+        calcDiscount = Math.min(discountVal, subtotal);
+      }
+
       setCouponCode(clean);
-      const tenPercent = Math.round(subtotal * 0.1);
-      setDiscount(tenPercent);
-      return { success: true, message: `১০% (৳${tenPercent}) ডিসকাউন্ট যুক্ত হয়েছে!` };
+      setDiscount(calcDiscount);
+      setCouponConfig({
+        code: clean,
+        type: discountType,
+        value: discountVal,
+        minOrder,
+      });
+
+      const discountText = discountType === "percentage" ? `${discountVal}% (৳${calcDiscount})` : `৳${calcDiscount}`;
+      return {
+        success: true,
+        message: `কুপন '${clean}' সফলভাবে যুক্ত হয়েছে! ${discountText} ছাড় পেয়েছেন।`,
+      };
+    } catch {
+      return {
+        success: false,
+        message: "কুপন যাচাই করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।",
+      };
     }
-    return { success: false, message: "ভুল অথবা অকার্যকর কুপন কোড।" };
   };
 
   const removeCoupon = () => {
     setCouponCode("");
     setDiscount(0);
+    setCouponConfig(null);
   };
 
   const openQuickBuy = (product: ProductItem) => {

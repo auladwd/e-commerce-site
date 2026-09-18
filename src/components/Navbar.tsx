@@ -6,12 +6,10 @@ import { useRouter } from "next/navigation";
 import {
   ShoppingBag,
   Search,
-  PhoneCall,
   User as UserIcon,
   ShieldCheck,
   Menu,
   X,
-  Languages,
   Truck,
   Heart,
 } from "lucide-react";
@@ -20,7 +18,7 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
-  const { lang, toggleLanguage, t } = useLanguage();
+  const { lang, t } = useLanguage();
   const { totalItems, setIsCartOpen } = useCart();
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -64,44 +62,6 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full transition-all duration-300">
-      {/* Top Notification Bar */}
-      <div className="bg-slate-900 text-slate-200 text-[11px] sm:text-xs py-1.5 px-3 sm:px-4 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
-              {lang === "bn" ? "অফার" : "PROMO"}
-            </span>
-            <span className="truncate text-[10px] sm:text-xs text-slate-300 font-medium">
-              {lang === "bn"
-                ? "🎁 প্রথম অর্ডারে কুপন 'SAVE10' দিয়ে ১০% ছাড়!"
-                : "🎁 Use coupon 'SAVE10' for 10% discount!"}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-            {/* Hotline Call */}
-            <a
-              href="tel:01700112233"
-              className="flex items-center gap-1 hover:text-emerald-400 transition text-[10px] sm:text-xs"
-            >
-              <PhoneCall className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400" />
-              <span className="hidden xs:inline">01700-112233</span>
-            </a>
-
-            {/* Language Switcher Button */}
-            <button
-              onClick={toggleLanguage}
-              className="flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded bg-slate-800 hover:bg-slate-700 text-white font-semibold transition cursor-pointer border border-slate-700 text-[10px] sm:text-xs"
-              title={lang === "bn" ? "Switch to English" : "বাংলায় পরিবর্তন করুন"}
-            >
-              <Languages className="w-3 h-3 text-emerald-400" />
-              <span>
-                {lang === "bn" ? "English" : "বাংলা"}
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* Main Glass Navbar */}
       <div className="glass-nav shadow-xs">

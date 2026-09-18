@@ -14,6 +14,11 @@ const defaultSettings = {
   bkashNumber: "01700-112233",
   nagadNumber: "01700-112233",
   currencySymbol: "৳",
+  couponEnabled: false,
+  couponCode: "SAVE10",
+  couponDiscountType: "percentage" as const,
+  couponDiscountValue: 10,
+  couponMinOrder: 0,
 };
 
 export async function GET() {

@@ -13,26 +13,17 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Language>("bn");
+  const [lang] = useState<Language>("bn");
 
   useEffect(() => {
-    const saved = localStorage.getItem("preferred_lang") as Language;
-    if (saved === "bn" || saved === "en") {
-      setLangState(saved);
-    }
+    // বাংলা ডিফল্ট ও একমাত্র সক্রিয় ভাষা হিসেবে নিশ্চিত করা
+    localStorage.setItem("preferred_lang", "bn");
   }, []);
 
-  const setLang = (newLang: Language) => {
-    setLangState(newLang);
-    localStorage.setItem("preferred_lang", newLang);
-  };
+  const setLang = () => {};
+  const toggleLanguage = () => {};
 
-  const toggleLanguage = () => {
-    const next = lang === "bn" ? "en" : "bn";
-    setLang(next);
-  };
-
-  const t = translations[lang];
+  const t = translations.bn;
 
   return (
     <LanguageContext.Provider value={{ lang, setLang, toggleLanguage, t }}>

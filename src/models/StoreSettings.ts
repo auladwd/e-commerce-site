@@ -12,6 +12,11 @@ export interface IStoreSettings extends Document {
   bkashNumber: string;
   nagadNumber: string;
   currencySymbol: string;
+  couponEnabled: boolean;
+  couponCode: string;
+  couponDiscountType: "percentage" | "fixed";
+  couponDiscountValue: number;
+  couponMinOrder: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,6 +34,11 @@ const StoreSettingsSchema = new Schema<IStoreSettings>(
     bkashNumber: { type: String, default: "01700000000" },
     nagadNumber: { type: String, default: "01700000000" },
     currencySymbol: { type: String, default: "৳" },
+    couponEnabled: { type: Boolean, default: false },
+    couponCode: { type: String, default: "SAVE10" },
+    couponDiscountType: { type: String, default: "percentage" },
+    couponDiscountValue: { type: Number, default: 10 },
+    couponMinOrder: { type: Number, default: 0 },
   },
   {
     timestamps: true,

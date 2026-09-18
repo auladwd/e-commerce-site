@@ -26,10 +26,10 @@ export default function CartDrawer() {
 
   if (!isCartOpen) return null;
 
-  const handleApplyCoupon = (e: React.FormEvent) => {
+  const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputCoupon.trim()) return;
-    const res = applyCoupon(inputCoupon);
+    const res = await applyCoupon(inputCoupon);
     setCouponMsg({ text: res.message, success: res.success });
   };
 
@@ -195,7 +195,10 @@ export default function CartDrawer() {
                     {discount}
                   </span>
                   <button
-                    onClick={removeCoupon}
+                    onClick={() => {
+                      removeCoupon();
+                      setCouponMsg(null);
+                    }}
                     className="text-rose-600 hover:underline text-[11px]"
                   >
                     মুছুন
